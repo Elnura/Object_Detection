@@ -108,6 +108,7 @@ class ObjectDetector(object):
 
   def detect(self, image):
     image_np = self._load_image_into_numpy_array(image)
+    result['message'] = '3'
     image_np_expanded = np.expand_dims(image_np, axis=0)
 
     graph = self.detection_graph
@@ -116,14 +117,15 @@ class ObjectDetector(object):
     scores = graph.get_tensor_by_name('detection_scores:0')
     classes = graph.get_tensor_by_name('detection_classes:0')
     num_detections = graph.get_tensor_by_name('num_detections:0')
+    result['message'] = '4'
 
     (boxes, scores, classes, num_detections) = self.sess.run(
         [boxes, scores, classes, num_detections],
         feed_dict={image_tensor: image_np_expanded})
-
+   result['message'] = '5'
     boxes, scores, classes, num_detections = map(
         np.squeeze, [boxes, scores, classes, num_detections])
-
+result['message'] = '6'
     return boxes, scores, classes.astype(int), num_detections
 
 
@@ -149,9 +151,11 @@ def detect_objects2():
 
   ipcamera = ipc.ipCamera(url=ip_camera_url, user='admin', password='admin')
   frame = ipcamera.get_frame()
+  result = {}
 
   if frame == None : # Kamera Bağlantısında Sorun Oluştu...
-    return
+    result['message'] = '1'
+    return result
 
   count = 0
 
@@ -160,6 +164,7 @@ def detect_objects2():
     if count % 60 == 0:
       frame = ipcamera.get_frame()
       if frame is not None:
+        result['message'] = '2'
         boxes, scores, classes, num_detections = client.detect(frame)
         frame.thumbnail((480, 480), Image.ANTIALIAS)
 
@@ -174,6 +179,7 @@ def detect_objects2():
 
         result = {}
         result['original'] = encode_image(frame.copy())
+        result['message'] = 'encoded'
 
         for cls, new_image in new_images.iteritems():
           category = client.category_index[cls]['name']
