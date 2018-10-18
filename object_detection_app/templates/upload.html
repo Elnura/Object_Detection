@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Object Detection API</title>
+    <link rel='shortcut icon' href='favicon.ico'/>
+
+    <script language="javascript" type="text/javascript">
+      function ChangePhoto(name, img) {
+        img = typeof img !== 'undefined' ? img : "{{ result['original'] }}";
+        target = document.getElementById("label");
+        target.innerHTML = name;
+        target = document.getElementById("photo");
+        target.src = img;
+      }
+      function WaitDisplay() {
+        target = document.getElementById("result");
+        target.style.display="none";
+        target = document.getElementById("loading");
+        target.style.display="";
+        setTimeout(function() {
+          document.getElementById("upload").submit();}, 100);
+        }
+    </script>
+
+  </head>
+  <body>
+
+    {% from "_formhelpers.html" import render_field %}
+
+    <h4>Nesne Tanıma</h4>
+    <div>
+      <form id="upload" method=post action={{ url_for('post') }} enctype="multipart/form-data">
+        <p><input type="button" onclick="WaitDisplay();" value="Göster"></p>
+      </form>
+    </div>
+    <hr>
+
+    <div id="result">
+      {% if result is none %}
+        <p>Kamera Okuma Hatası</p>
+      {% elif result|length > 0 %}
+        <div><img id="photo" src="{{ result['original'] }}" align="left" hspace="10" vspace="10" height="400" width="320"></div>
+        <p>
+           <h4>Tanınan insan sayısı : {{ result['human_count'] }} </h4>
+           <h4>İşlem Süresi : {{ result['process_time'] }} </h4>
+          </br>
+          {% for name, img in result.items() %}
+            {% if name != 'original' %}
+              <a href="javascript:void(0);"
+                 onclick="ChangePhoto('{{ name }}', '{{ result[ name ] }}');">{{ name }}</a>
+              </br>
+            {% endif %}
+          {% endfor %}
+        </p>
+      {% endif %}
+    </div>
+    <div id="loading" style="display:none">
+      <h4>Obje Tanıma İşlemi Gerçekleştiriliyor...</h4>
+    </div>
+
+  </body>
+</html>
